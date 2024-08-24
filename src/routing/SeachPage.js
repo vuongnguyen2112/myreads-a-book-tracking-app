@@ -20,9 +20,9 @@ class SearchPage extends Component {
   }
 
   onSearch = (event) => {
-    const searchQuery = event.target.value;
-    if (searchQuery) {
-      BooksAPI.search(searchQuery).then((resultBooks) => {
+    const query = event.target.value;
+    if (query) {
+      BooksAPI.search(query).then((resultBooks) => {
         if (!resultBooks || resultBooks.hasOwnProperty("error")) {
           this.setState({ searchResult: [], hasError: true });
         } else {
