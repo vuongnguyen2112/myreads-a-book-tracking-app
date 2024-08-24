@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { Link } from "react-router-dom";
 import Book from "../components/Book";
 import * as BooksAPI from "../BooksAPI";
-import NotFound from "./NotFound";
+import NotFound from "../components/NotFound";
 
 class SearchPage extends Component {
   state = {
