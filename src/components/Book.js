@@ -1,7 +1,31 @@
 import React from "react";
 import noThumbnailImage from "../icons/no_cover_image.png";
+import PropTypes from "prop-types";
 
 const Book = ({ book, onChangeBookShelf }) => {
+  const shelves = [
+    {
+      id: 1,
+      value: "currentlyReading",
+      text: "Currently Reading"
+    },
+    {
+      id: 2,
+      value: "wantToRead",
+      text: "Want to Read"
+    },
+    {
+      id: 3,
+      value: "read",
+      text: "Read"
+    },
+    {
+      id: 4,
+      value: "none",
+      text: "None"
+    },
+  ];
+
   return (
     <li>
       <div className="book">
@@ -24,10 +48,11 @@ const Book = ({ book, onChangeBookShelf }) => {
               <option value="moveTo" disabled>
                 Move to...
               </option>
-              <option value="currentlyReading">Currently Reading</option>
-              <option value="wantToRead">Want to Read</option>
-              <option value="read">Read</option>
-              <option value="none">None</option>
+              {shelves.map(item => (
+                <option value={item.value} key={item.id}>
+                  {item.text}
+                </option>
+              ))}
             </select>
           </div>
         </div>
@@ -41,6 +66,11 @@ const Book = ({ book, onChangeBookShelf }) => {
       </div>
     </li>
   );
+};
+
+Book.propTypes = {
+  book: PropTypes.object.isRequired,
+  onChangeBookShelf: PropTypes.func.isRequired,
 };
 
 export default Book;

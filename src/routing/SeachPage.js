@@ -1,43 +1,47 @@
-import React, { Component } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import Book from "../components/Book";
 import * as BooksAPI from "../BooksAPI";
+import Book from "../components/Book";
 import NotFound from "../components/NotFound";
 
-class SearchPage extends Component {
-  state = {
-    books: [],
-    searchResult: [],
-    hasError: false,
-  };
+const SearchPage = () => {
+  const [books, setBooks] = useState([]);
+  const [searchResult, setSearchResult] = useState([]);
+  const [hasError, setHasError] = useState([]);
+  const [query, setQuery] = useState("");
 
-  componentDidMount() {
+  useEffect(() => {
     BooksAPI.getAll().then((resultBooks) => {
-      this.setState({
-        books: resultBooks,
-      });
+      setBooks(resultBooks);
     });
-  }
+  }, []);
 
-  onSearch = (event) => {
-    const query = event.target.value;
-    if (query) {
-      BooksAPI.search(query).then((resultBooks) => {
-        if (!resultBooks || resultBooks.hasOwnProperty("error")) {
-          this.setState({ searchResult: [], hasError: true });
-        } else {
-          this.setState({ searchResult: resultBooks, hasError: false });
-          this.syncBookShelf();
-        }
-      });
-    } else {
-      this.setState({ searchResult: [] });
+  useEffect(() => {
+    try {
+      if (query) {
+        BooksAPI.search(query).then((resultBooks) => {
+          if (!resultBooks || resultBooks.hasOwnProperty("error")) {
+            setSearchResult([]);
+            setHasError(true);
+          } else {
+            setSearchResult(resultBooks);
+            setHasError(false);
+            syncBookShelf();
+          }
+        });
+      }
+    } catch (error) {
+      setSearchResult([]);
+      setHasError(true);
     }
+    // eslint-disable-next-line
+  }, [query]);
+
+  const onSearch = (event) => {
+    setQuery(event.target.value);
   };
 
-  syncBookShelf = () => {
-    const books = this.state.books;
-    const searchResult = this.state.searchResult;
+  const syncBookShelf = () => {
     if (searchResult.length > 0) {
       books.forEach((book) => {
         searchResult.forEach((searchResultBook) => {
@@ -46,60 +50,56 @@ class SearchPage extends Component {
           }
         });
       });
+      setSearchResult(searchResult);
     }
-    this.setState({ searchResult: searchResult });
   };
 
-  onChangeBookShelf = (book, shelf) => {
+  const onChangeBookShelf = (book, shelf) => {
     BooksAPI.update(book, shelf).then(() => {
       book.shelf = shelf;
-      var updatedBooks = this.state.books.filter(
+      var updatedBooks = books?.filter(
         (resultBook) => resultBook.id !== book.id
       );
       updatedBooks.push(book);
-      this.setState({ books: updatedBooks });
+      setBooks(updatedBooks);
     });
   };
 
-  render() {
-    const {searchResult} = this.state;
-    const {hasError} = this.state;
-    return (
-      <div className="search-books">
-        <div className="search-books-bar">
-          <Link to="/" className="close-search">
-            Close
-          </Link>
-          <div className="search-books-input-wrapper">
-            <input
-              type="text"
-              onChange={e => this.onSearch(e)}
-              placeholder="Search by title or author"
-            />
-          </div>
-        </div>
-        <div className="search-books-results">
-          {searchResult.length > 0 && (
-            <div>
-              <div>
-                <h3>Search Returned {searchResult.length} books</h3>
-              </div>
-              <ol className="books-grid">
-                {searchResult.map((book) => (
-                  <Book
-                    key={book.id}
-                    book={book}
-                    onChangeBookShelf={this.onChangeBookShelf}
-                  />
-                ))}
-              </ol>
-            </div>
-          )}
-          {hasError && <NotFound />}
+  return (
+    <div className="search-books">
+      <div className="search-books-bar">
+        <Link to="/" className="close-search"></Link>
+        <div className="search-books-input-wrapper">
+          <input
+            type="text"
+            onChange={(e) => onSearch(e)}
+            placeholder="Search by title or author"
+          />
         </div>
       </div>
-    );
-  }
-}
+      <div className="search-books-results">
+        {searchResult?.length > 0 && (
+          <div>
+            <div>
+              <h3>Search Returned {searchResult?.length} books</h3>
+            </div>
+            <ol className="books-grid">
+              {searchResult?.map((book) => (
+                <Book
+                  key={book.id}
+                  book={book}
+                  onChangeBookShelf={(book, shelf) =>
+                    onChangeBookShelf(book, shelf)
+                  }
+                />
+              ))}
+            </ol>
+          </div>
+        )}
+        {hasError && <NotFound />}
+      </div>
+    </div>
+  );
+};
 
 export default SearchPage;

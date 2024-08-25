@@ -45,7 +45,6 @@ const BookShelf = () => {
                   <ShelfCompartment
                     key={index}
                     books={compartmentBooks}
-                    compartmentsList={compartments}
                     onChangeBookShelf={onChangeBookShelf}
                   />
                 </div>
